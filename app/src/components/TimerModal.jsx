@@ -2,6 +2,27 @@ import { useState, useEffect, useRef } from 'react'
 import { Play, Pause, RotateCcw, Check } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 
+function playTimerEndSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const playBeep = (startTime) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.frequency.value = 880
+      osc.type = 'sine'
+      gain.gain.setValueAtTime(0.25, startTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.25)
+      osc.start(startTime)
+      osc.stop(startTime + 0.25)
+    }
+    playBeep(0)
+    playBeep(0.35)
+    playBeep(0.7)
+  } catch (_) {}
+}
+
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
@@ -72,6 +93,7 @@ export function TimerModal() {
   useEffect(() => {
     if (!isRunning && timeLeft === 0 && activity && isTimerMode && !timerEndHandledRef.current) {
       timerEndHandledRef.current = true
+      playTimerEndSound()
       if (needsInput(activity.type)) {
         setShowInput(true)
       } else {
