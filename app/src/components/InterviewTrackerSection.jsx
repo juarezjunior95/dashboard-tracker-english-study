@@ -47,7 +47,7 @@ export function InterviewTrackerSection() {
 
   return (
     <>
-      <section className="rounded-xl bg-white p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+      <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
             <Briefcase className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden />

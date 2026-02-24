@@ -16,14 +16,18 @@ function App() {
   const { interviewTrackerEnabled, setInterviewTrackerEnabled } = useApp()
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className="min-h-screen flex flex-col bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 overflow-x-hidden">
       <Header />
       <WeekNavigation />
-      <main id="main" className="max-w-[1400px] mx-auto w-full px-4 py-4 flex-1" role="main">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Calendar />
-          <ChecklistsSection />
-          <div className="flex flex-col gap-4">
+      <main id="main" className="max-w-[1400px] mx-auto w-full px-3 sm:px-4 py-4 flex-1 min-w-0" role="main">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <Calendar />
+          </div>
+          <div className="min-w-0">
+            <ChecklistsSection />
+          </div>
+          <div className="flex flex-col gap-3 sm:gap-4 min-w-0">
             <ChartsSection />
             {interviewTrackerEnabled ? (
               <InterviewTrackerSection />

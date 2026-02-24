@@ -9,7 +9,7 @@ export function Calendar() {
   const activitiesState = weekData.activities ?? {}
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 min-w-0">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
         <span aria-hidden>📅</span>
         Calendário Semanal

@@ -19,7 +19,7 @@ export function DailyChecklist() {
   })
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+    <section className="rounded-xl bg-white p-4 sm:p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 min-w-0">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
         <CheckSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden />
         Checklist de Hoje
@@ -59,7 +59,7 @@ export function DailyChecklist() {
                     <button
                       type="button"
                       onClick={() => openManualCompleteModal(activity, todayKey)}
-                      className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 focus:outline-none focus:underline"
+                      className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 focus:outline-none focus:underline py-2 px-2 rounded touch-manipulation"
                     >
                       Concluir
                     </button>
