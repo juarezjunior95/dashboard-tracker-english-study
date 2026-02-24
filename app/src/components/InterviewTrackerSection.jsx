@@ -1,9 +1,12 @@
-import { Briefcase, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Briefcase, Plus, Pencil, Trash2, EyeOff } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { InterviewModal } from './InterviewModal.jsx'
 
 const TYPE_LABELS = { hr: 'HR', technical: 'Técnica', manager: 'Gerente' }
 const STATUS_LABELS = { scheduled: 'Agendada', done: 'Realizada', cancelled: 'Cancelada', rejected: 'Recusada' }
+const CURRENCY_LABELS = { brl: 'BRL', usd: 'USD', eur: 'EUR', other: 'Outro' }
+const CONTRACT_LABELS = { clt: 'CLT', pj: 'PJ', other: 'Outro' }
+const FEEDBACK_LABELS = { no_feedback: 'Sem feedback', rejected: 'Reprovado', next_phase: 'Próxima fase', hired: 'Contratado' }
 
 function formatDate(dateStr) {
   if (!dateStr) return '–'
@@ -13,7 +16,7 @@ function formatDate(dateStr) {
 }
 
 export function InterviewTrackerSection() {
-  const { state, saveInterviews, openInterviewModal } = useApp()
+  const { state, saveInterviews, openInterviewModal, setInterviewTrackerEnabled } = useApp()
   const interviews = state.interviews ?? []
 
   const thisYear = new Date().getFullYear()
@@ -43,10 +46,21 @@ export function InterviewTrackerSection() {
   return (
     <>
       <section className="rounded-xl bg-white p-5 shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
-          <Briefcase className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden />
-          Interview Tracker
-        </h2>
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
+            <Briefcase className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden />
+            Interview Tracker
+          </h2>
+          <button
+            type="button"
+            onClick={() => setInterviewTrackerEnabled(false)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            title="Ocultar Interview Tracker"
+          >
+            <EyeOff className="w-4 h-4" aria-hidden />
+            Ocultar
+          </button>
+        </div>
 
         <div className="flex flex-wrap gap-3 mb-4">
           <div className="px-3 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800">
@@ -106,7 +120,13 @@ export function InterviewTrackerSection() {
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {formatDate(i.date)} · {TYPE_LABELS[i.type] || i.type} · {STATUS_LABELS[i.status] || i.status}
                     {i.rating != null ? ` · ${i.rating}/10` : ''}
-                    {i.salaryOffer ? ` · ${i.salaryOffer}` : ''}
+                    {i.salaryOffer
+                      ? ` · ${i.salaryOffer}${(i.salaryCurrency && i.salaryCurrency !== 'other') ? ` ${CURRENCY_LABELS[i.salaryCurrency] || ''}` : ''}${(i.contractType && i.contractType !== 'other') ? ` (${CONTRACT_LABELS[i.contractType]})` : ''}`
+                      : ''}
+                    {' · '}
+                    <span className={i.feedback === 'hired' ? 'text-emerald-600 dark:text-emerald-400' : i.feedback === 'next_phase' ? 'text-indigo-600 dark:text-indigo-400' : i.feedback === 'rejected' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}>
+                      {FEEDBACK_LABELS[i.feedback] || FEEDBACK_LABELS.no_feedback}
+                    </span>
                   </span>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">

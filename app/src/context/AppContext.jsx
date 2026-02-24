@@ -5,6 +5,7 @@ import { getWeekKey, getWeekRange } from '../lib/dates.js'
 import { calculatePoints } from '../lib/points.js'
 
 const THEME_KEY = 'b2-study-tracker-theme'
+const INTERVIEW_TRACKER_KEY = 'b2-study-tracker-interview-tracker-enabled'
 
 function getInitialTheme() {
   if (typeof window === 'undefined') return 'light'
@@ -12,6 +13,14 @@ function getInitialTheme() {
   if (saved === 'dark' || saved === 'light') return saved
   if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark'
   return 'light'
+}
+
+function getInitialInterviewTrackerEnabled() {
+  if (typeof window === 'undefined') return true
+  const saved = localStorage.getItem(INTERVIEW_TRACKER_KEY)
+  if (saved === 'false') return false
+  if (saved === 'true') return true
+  return true
 }
 
 const AppContext = createContext(null)
@@ -41,6 +50,7 @@ export function AppProvider({ children }) {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [timerModal, setTimerModal] = useState(initialTimerModal)
   const [theme, setThemeState] = useState(getInitialTheme)
+  const [interviewTrackerEnabled, setInterviewTrackerEnabledState] = useState(getInitialInterviewTrackerEnabled)
 
   useEffect(() => {
     const root = document.documentElement
@@ -53,6 +63,16 @@ export function AppProvider({ children }) {
       localStorage.setItem(THEME_KEY, theme)
     } catch (_) {}
   }, [theme])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(INTERVIEW_TRACKER_KEY, String(interviewTrackerEnabled))
+    } catch (_) {}
+  }, [interviewTrackerEnabled])
+
+  const setInterviewTrackerEnabled = useCallback((next) => {
+    setInterviewTrackerEnabledState((prev) => (typeof next === 'function' ? next(prev) : next))
+  }, [])
 
   const setTheme = useCallback((next) => {
     setThemeState((prev) => (typeof next === 'function' ? next(prev) : next))
@@ -267,7 +287,9 @@ export function AppProvider({ children }) {
     saveInterviews,
     interviewModal,
     openInterviewModal,
-    closeInterviewModal
+    closeInterviewModal,
+    interviewTrackerEnabled,
+    setInterviewTrackerEnabled
   }
 
   return (

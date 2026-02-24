@@ -14,6 +14,26 @@ const STATUSES = [
   { value: 'rejected', label: 'Recusada' }
 ]
 
+const CURRENCIES = [
+  { value: 'brl', label: 'Reais (BRL)' },
+  { value: 'usd', label: 'Dólar (USD)' },
+  { value: 'eur', label: 'Euro (EUR)' },
+  { value: 'other', label: 'Outro' }
+]
+
+const CONTRACT_TYPES = [
+  { value: 'clt', label: 'CLT' },
+  { value: 'pj', label: 'PJ' },
+  { value: 'other', label: 'Outro' }
+]
+
+const FEEDBACK_OPTIONS = [
+  { value: 'no_feedback', label: 'Sem feedback' },
+  { value: 'rejected', label: 'Reprovado' },
+  { value: 'next_phase', label: 'Próxima fase' },
+  { value: 'hired', label: 'Contratado' }
+]
+
 function toInputDate(dateStr) {
   if (!dateStr) return ''
   const d = new Date(dateStr)
@@ -31,7 +51,10 @@ export function InterviewModal() {
   const [type, setType] = useState('hr')
   const [rating, setRating] = useState('')
   const [salaryOffer, setSalaryOffer] = useState('')
+  const [salaryCurrency, setSalaryCurrency] = useState('brl')
+  const [contractType, setContractType] = useState('other')
   const [status, setStatus] = useState('scheduled')
+  const [feedback, setFeedback] = useState('no_feedback')
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
@@ -42,7 +65,10 @@ export function InterviewModal() {
         setType(interview.type ?? 'hr')
         setRating(interview.rating != null ? String(interview.rating) : '')
         setSalaryOffer(interview.salaryOffer ?? '')
+        setSalaryCurrency(interview.salaryCurrency ?? 'brl')
+        setContractType(interview.contractType ?? 'other')
         setStatus(interview.status ?? 'done')
+        setFeedback(interview.feedback ?? 'no_feedback')
         setNotes(interview.notes ?? '')
       } else {
         setDate(toInputDate(new Date().toISOString()))
@@ -50,7 +76,10 @@ export function InterviewModal() {
         setType('hr')
         setRating('')
         setSalaryOffer('')
+        setSalaryCurrency('brl')
+        setContractType('other')
         setStatus('scheduled')
+        setFeedback('no_feedback')
         setNotes('')
       }
     }
@@ -71,7 +100,10 @@ export function InterviewModal() {
       type,
       rating: ratingNum,
       salaryOffer: salaryOffer.trim() || null,
+      salaryCurrency: salaryCurrency || 'other',
+      contractType: contractType || 'other',
       status,
+      feedback: feedback || 'no_feedback',
       notes: notes.trim() || null
     }
     saveInterviews((list) => {
@@ -167,9 +199,47 @@ export function InterviewModal() {
               type="text"
               value={salaryOffer}
               onChange={(e) => setSalaryOffer(e.target.value)}
-              placeholder="Ex.: R$ 12.000 ou A combinar"
+              placeholder="Ex.: 12.000 ou A combinar"
               className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700"
             />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Moeda</label>
+              <select
+                value={salaryCurrency}
+                onChange={(e) => setSalaryCurrency(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700"
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de contrato</label>
+              <select
+                value={contractType}
+                onChange={(e) => setContractType(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700"
+              >
+                {CONTRACT_TYPES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Feedback</label>
+            <select
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700"
+            >
+              {FEEDBACK_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
