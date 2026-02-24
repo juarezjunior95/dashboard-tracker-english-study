@@ -35,15 +35,13 @@ const FEEDBACK_OPTIONS = [
 ]
 
 const ROLES = [
-  { value: 'qa_jr', label: 'QA Jr' },
-  { value: 'qa_analyst', label: 'QA Analyst' },
-  { value: 'mid_qa', label: 'Mid Level QA' },
-  { value: 'senior_qa', label: 'Senior QA' },
-  { value: 'qa_lead', label: 'QA Lead' },
-  { value: 'qa_engineer', label: 'QA Engineer' },
-  { value: 'sdet', label: 'SDET' },
-  { value: 'automation_qa', label: 'Automation QA' },
-  { value: 'manual_qa', label: 'Manual QA' },
+  { value: 'junior', label: 'Junior' },
+  { value: 'pleno', label: 'Pleno' },
+  { value: 'mid', label: 'Mid Level' },
+  { value: 'senior', label: 'Senior' },
+  { value: 'especialista', label: 'Especialista' },
+  { value: 'lead', label: 'Lead' },
+  { value: 'manager', label: 'Manager' },
   { value: 'other', label: 'Outro' }
 ]
 
@@ -53,7 +51,8 @@ const ENGLISH_LEVELS = [
   { value: 'a2', label: 'A2' },
   { value: 'b1', label: 'B1' },
   { value: 'b2', label: 'B2' },
-  { value: 'c1', label: 'C1' }
+  { value: 'c1', label: 'C1' },
+  { value: 'c2', label: 'C2' }
 ]
 
 function toInputDate(dateStr) {

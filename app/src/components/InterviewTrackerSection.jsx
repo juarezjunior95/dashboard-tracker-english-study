@@ -7,8 +7,13 @@ const STATUS_LABELS = { scheduled: 'Agendada', done: 'Realizada', cancelled: 'Ca
 const CURRENCY_LABELS = { brl: 'BRL', usd: 'USD', eur: 'EUR', other: 'Outro' }
 const CONTRACT_LABELS = { clt: 'CLT', pj: 'PJ', other: 'Outro' }
 const FEEDBACK_LABELS = { no_feedback: 'Sem feedback', rejected: 'Reprovado', next_phase: 'Próxima fase', hired: 'Contratado' }
-const ROLE_LABELS = { qa_jr: 'QA Jr', qa_analyst: 'QA Analyst', mid_qa: 'Mid Level QA', senior_qa: 'Senior QA', qa_lead: 'QA Lead', qa_engineer: 'QA Engineer', sdet: 'SDET', automation_qa: 'Automation QA', manual_qa: 'Manual QA', other: 'Outro' }
-const ENGLISH_LEVEL_LABELS = { a1: 'A1', a2: 'A2', b1: 'B1', b2: 'B2', c1: 'C1' }
+const ROLE_LABELS = {
+  junior: 'Junior', pleno: 'Pleno', mid: 'Mid Level', senior: 'Senior',
+  especialista: 'Especialista', lead: 'Lead', manager: 'Manager', other: 'Outro',
+  qa_jr: 'QA Jr', qa_analyst: 'QA Analyst', mid_qa: 'Mid Level QA', senior_qa: 'Senior QA',
+  qa_lead: 'QA Lead', qa_engineer: 'QA Engineer', sdet: 'SDET', automation_qa: 'Automation QA', manual_qa: 'Manual QA'
+}
+const ENGLISH_LEVEL_LABELS = { a1: 'A1', a2: 'A2', b1: 'B1', b2: 'B2', c1: 'C1', c2: 'C2' }
 
 function formatDate(dateStr) {
   if (!dateStr) return '–'
