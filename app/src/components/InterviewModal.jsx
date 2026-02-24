@@ -34,6 +34,28 @@ const FEEDBACK_OPTIONS = [
   { value: 'hired', label: 'Contratado' }
 ]
 
+const ROLES = [
+  { value: 'qa_jr', label: 'QA Jr' },
+  { value: 'qa_analyst', label: 'QA Analyst' },
+  { value: 'mid_qa', label: 'Mid Level QA' },
+  { value: 'senior_qa', label: 'Senior QA' },
+  { value: 'qa_lead', label: 'QA Lead' },
+  { value: 'qa_engineer', label: 'QA Engineer' },
+  { value: 'sdet', label: 'SDET' },
+  { value: 'automation_qa', label: 'Automation QA' },
+  { value: 'manual_qa', label: 'Manual QA' },
+  { value: 'other', label: 'Outro' }
+]
+
+const ENGLISH_LEVELS = [
+  { value: '', label: 'Não informado' },
+  { value: 'a1', label: 'A1' },
+  { value: 'a2', label: 'A2' },
+  { value: 'b1', label: 'B1' },
+  { value: 'b2', label: 'B2' },
+  { value: 'c1', label: 'C1' }
+]
+
 function toInputDate(dateStr) {
   if (!dateStr) return ''
   const d = new Date(dateStr)
@@ -49,6 +71,8 @@ export function InterviewModal() {
   const [date, setDate] = useState('')
   const [company, setCompany] = useState('')
   const [type, setType] = useState('hr')
+  const [role, setRole] = useState('other')
+  const [englishLevel, setEnglishLevel] = useState('')
   const [rating, setRating] = useState('')
   const [salaryOffer, setSalaryOffer] = useState('')
   const [salaryCurrency, setSalaryCurrency] = useState('brl')
@@ -63,6 +87,8 @@ export function InterviewModal() {
         setDate(toInputDate(interview.date))
         setCompany(interview.company ?? '')
         setType(interview.type ?? 'hr')
+        setRole(interview.role ?? 'other')
+        setEnglishLevel(interview.englishLevel ?? '')
         setRating(interview.rating != null ? String(interview.rating) : '')
         setSalaryOffer(interview.salaryOffer ?? '')
         setSalaryCurrency(interview.salaryCurrency ?? 'brl')
@@ -74,6 +100,8 @@ export function InterviewModal() {
         setDate(toInputDate(new Date().toISOString()))
         setCompany('')
         setType('hr')
+        setRole('other')
+        setEnglishLevel('')
         setRating('')
         setSalaryOffer('')
         setSalaryCurrency('brl')
@@ -98,6 +126,8 @@ export function InterviewModal() {
       date: date || new Date().toISOString().slice(0, 10),
       company: companyTrim,
       type,
+      role: role || 'other',
+      englishLevel: englishLevel || null,
       rating: ratingNum,
       salaryOffer: salaryOffer.trim() || null,
       salaryCurrency: salaryCurrency || 'other',
@@ -168,6 +198,32 @@ export function InterviewModal() {
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
             </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cargo</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700"
+              >
+                {ROLES.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Inglês exigido</label>
+              <select
+                value={englishLevel}
+                onChange={(e) => setEnglishLevel(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700"
+              >
+                {ENGLISH_LEVELS.map((level) => (
+                  <option key={level.value || 'none'} value={level.value}>{level.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>

@@ -7,6 +7,8 @@ const STATUS_LABELS = { scheduled: 'Agendada', done: 'Realizada', cancelled: 'Ca
 const CURRENCY_LABELS = { brl: 'BRL', usd: 'USD', eur: 'EUR', other: 'Outro' }
 const CONTRACT_LABELS = { clt: 'CLT', pj: 'PJ', other: 'Outro' }
 const FEEDBACK_LABELS = { no_feedback: 'Sem feedback', rejected: 'Reprovado', next_phase: 'Próxima fase', hired: 'Contratado' }
+const ROLE_LABELS = { qa_jr: 'QA Jr', qa_analyst: 'QA Analyst', mid_qa: 'Mid Level QA', senior_qa: 'Senior QA', qa_lead: 'QA Lead', qa_engineer: 'QA Engineer', sdet: 'SDET', automation_qa: 'Automation QA', manual_qa: 'Manual QA', other: 'Outro' }
+const ENGLISH_LEVEL_LABELS = { a1: 'A1', a2: 'A2', b1: 'B1', b2: 'B2', c1: 'C1' }
 
 function formatDate(dateStr) {
   if (!dateStr) return '–'
@@ -86,9 +88,16 @@ export function InterviewTrackerSection() {
                   key={i.id}
                   className="flex items-center justify-between gap-2 px-2 py-1.5 rounded bg-gray-50 dark:bg-gray-700 text-sm"
                 >
-                  <span className="font-medium text-gray-800 dark:text-gray-200">{i.company}</span>
-                  <span className="text-gray-500 dark:text-gray-400">{formatDate(i.date)}</span>
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">{TYPE_LABELS[i.type] || i.type}</span>
+                  <div className="min-w-0">
+                    <span className="font-medium text-gray-800 dark:text-gray-200">{i.company}</span>
+                    {(i.role && i.role !== 'other') || i.englishLevel ? (
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block">
+                        {(i.role && i.role !== 'other') ? ROLE_LABELS[i.role] : ''}{(i.role && i.role !== 'other') && i.englishLevel ? ' · ' : ''}{i.englishLevel ? `Inglês ${ENGLISH_LEVEL_LABELS[i.englishLevel] || i.englishLevel.toUpperCase()}` : ''}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="text-gray-500 dark:text-gray-400 shrink-0">{formatDate(i.date)}</span>
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400 shrink-0">{TYPE_LABELS[i.type] || i.type}</span>
                 </li>
               ))}
             </ul>
@@ -118,7 +127,10 @@ export function InterviewTrackerSection() {
                 <div className="min-w-0 flex-1">
                   <span className="font-medium text-gray-800 dark:text-gray-200 block truncate">{i.company}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatDate(i.date)} · {TYPE_LABELS[i.type] || i.type} · {STATUS_LABELS[i.status] || i.status}
+                    {formatDate(i.date)} · {TYPE_LABELS[i.type] || i.type}
+                    {(i.role && i.role !== 'other') ? ` · ${ROLE_LABELS[i.role] || i.role}` : ''}
+                    {i.englishLevel ? ` · Inglês ${ENGLISH_LEVEL_LABELS[i.englishLevel] || i.englishLevel.toUpperCase()}` : ''}
+                    {' · '}{STATUS_LABELS[i.status] || i.status}
                     {i.rating != null ? ` · ${i.rating}/10` : ''}
                     {i.salaryOffer
                       ? ` · ${i.salaryOffer}${(i.salaryCurrency && i.salaryCurrency !== 'other') ? ` ${CURRENCY_LABELS[i.salaryCurrency] || ''}` : ''}${(i.contractType && i.contractType !== 'other') ? ` (${CONTRACT_LABELS[i.contractType]})` : ''}`
