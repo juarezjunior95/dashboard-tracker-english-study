@@ -2,6 +2,7 @@
  * Persistência do estado no localStorage.
  */
 import { createDefaultState, ensureCurrentWeek } from './state.js'
+import { defaultActivityTypes } from '../data/defaults.js'
 
 export const STORAGE_KEY = 'b2-study-tracker-v5'
 
@@ -15,6 +16,9 @@ export function loadState() {
     if (saved) {
       const state = JSON.parse(saved)
       if (!Array.isArray(state.interviews)) state.interviews = []
+      if (!Array.isArray(state.activityTypes) || state.activityTypes.length === 0) {
+        state.activityTypes = JSON.parse(JSON.stringify(defaultActivityTypes))
+      }
       return ensureCurrentWeek(state)
     }
   } catch (error) {

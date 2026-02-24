@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2, Plus, ChevronDown, ChevronUp, Settings2 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { daysOfWeek, dayNames } from '../data/defaults.js'
 
@@ -20,15 +20,29 @@ function durationMinutes(start, end) {
   return eh * 60 + em - (sh * 60 + sm)
 }
 
+function isTypeUsedInSchedule(schedule, typeValue) {
+  return daysOfWeek.some((day) => (schedule[day] || []).some((act) => act.type === typeValue))
+}
+
 export function EditScheduleModal() {
-  const { state, saveSchedule, closeEditModal, editModalOpen } = useApp()
+  const { state, saveSchedule, closeEditModal, editModalOpen, updateActivityTypes } = useApp()
   const [scheduleCopy, setScheduleCopy] = useState({})
   const [editing, setEditing] = useState(null)
+  const [showManageTypes, setShowManageTypes] = useState(false)
+  const [addingType, setAddingType] = useState(false)
+  const [newTypeLabel, setNewTypeLabel] = useState('')
+  const [newTypePoints, setNewTypePoints] = useState(0)
+  const [editingTypeValue, setEditingTypeValue] = useState(null)
+  const [editTypeLabel, setEditTypeLabel] = useState('')
+  const [editTypePoints, setEditTypePoints] = useState(0)
 
   useEffect(() => {
     if (editModalOpen) {
       setScheduleCopy(JSON.parse(JSON.stringify(state.schedule || {})))
       setEditing(null)
+      setShowManageTypes(false)
+      setAddingType(false)
+      setEditingTypeValue(null)
     }
   }, [editModalOpen, state.schedule])
 
@@ -103,6 +117,52 @@ export function EditScheduleModal() {
     closeEditModal()
   }
 
+  const handleAddType = () => {
+    const label = newTypeLabel.trim()
+    if (!label) {
+      window.alert('Digite o nome do tipo.')
+      return
+    }
+    const points = Math.max(0, Number(newTypePoints)) || 0
+    const value = `custom-${Date.now().toString(36)}`
+    updateActivityTypes((prev) => [...(prev || []), { value, label, defaultPoints: points }])
+    setNewTypeLabel('')
+    setNewTypePoints(0)
+    setAddingType(false)
+  }
+
+  const handleStartEditType = (type) => {
+    setEditingTypeValue(type.value)
+    setEditTypeLabel(type.label)
+    setEditTypePoints(type.defaultPoints ?? 0)
+  }
+
+  const handleSaveEditType = () => {
+    if (!editingTypeValue) return
+    const label = editTypeLabel.trim()
+    if (!label) {
+      window.alert('Digite o nome do tipo.')
+      return
+    }
+    const points = Math.max(0, Number(editTypePoints)) || 0
+    updateActivityTypes((prev) =>
+      (prev || []).map((t) =>
+        t.value === editingTypeValue ? { ...t, label, defaultPoints: points } : t
+      )
+    )
+    setEditingTypeValue(null)
+  }
+
+  const handleDeleteType = (typeValue) => {
+    if (isTypeUsedInSchedule(scheduleCopy, typeValue)) {
+      window.alert('Não é possível excluir: há atividades no cronograma usando este tipo. Remova ou altere essas atividades primeiro.')
+      return
+    }
+    if (!window.confirm('Excluir este tipo de atividade? Ele não será mais exibido na lista.')) return
+    updateActivityTypes((prev) => (prev || []).filter((t) => t.value !== typeValue))
+    setEditingTypeValue(null)
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70"
@@ -125,7 +185,75 @@ export function EditScheduleModal() {
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto flex-1">
+        <div className="p-4 overflow-y-auto flex-1 space-y-4">
+          <div className="rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowManageTypes((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 bg-gray-50 dark:bg-gray-700/50 text-left text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <span className="flex items-center gap-2">
+                <Settings2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" aria-hidden />
+                Gerenciar tipos de atividade
+              </span>
+              {showManageTypes ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            {showManageTypes && (
+              <div className="p-3 border-t border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 space-y-3">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Adicione, edite ou exclua tipos. Eles aparecem na lista ao criar/editar uma atividade. Excluir só é permitido se nenhuma atividade no cronograma usar o tipo.
+                </p>
+                <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {activityTypes.map((t) => (
+                    <li key={t.value} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded bg-gray-50 dark:bg-gray-700/50">
+                      {editingTypeValue === t.value ? (
+                        <div className="flex flex-wrap items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={editTypeLabel}
+                            onChange={(e) => setEditTypeLabel(e.target.value)}
+                            className="flex-1 min-w-[100px] px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700 text-sm"
+                            placeholder="Nome"
+                          />
+                          <input
+                            type="number"
+                            min={0}
+                            value={editTypePoints}
+                            onChange={(e) => setEditTypePoints(Number(e.target.value))}
+                            className="w-16 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700 text-sm"
+                            placeholder="pts"
+                          />
+                          <button type="button" onClick={handleSaveEditType} className="px-2 py-1 rounded bg-emerald-600 text-white text-sm">Salvar</button>
+                          <button type="button" onClick={() => setEditingTypeValue(null)} className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-sm">Cancelar</button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm text-gray-800 dark:text-gray-200">{t.label} ({t.defaultPoints ?? 0} pts)</span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button type="button" onClick={() => handleStartEditType(t)} className="p-1 rounded text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30" aria-label="Editar tipo"> <Pencil className="w-3.5 h-3.5" /> </button>
+                            <button type="button" onClick={() => handleDeleteType(t.value)} className="p-1 rounded text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30" aria-label="Excluir tipo"> <Trash2 className="w-3.5 h-3.5" /> </button>
+                          </div>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {addingType ? (
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                    <input type="text" value={newTypeLabel} onChange={(e) => setNewTypeLabel(e.target.value)} placeholder="Nome do tipo" className="flex-1 min-w-[120px] px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700 text-sm" />
+                    <input type="number" min={0} value={newTypePoints} onChange={(e) => setNewTypePoints(Number(e.target.value))} placeholder="pts" className="w-16 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 dark:bg-gray-700 text-sm" />
+                    <button type="button" onClick={handleAddType} className="px-3 py-1.5 rounded bg-indigo-600 text-white text-sm font-medium">Adicionar</button>
+                    <button type="button" onClick={() => { setAddingType(false); setNewTypeLabel(''); setNewTypePoints(0); }} className="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-sm">Cancelar</button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => setAddingType(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <Plus className="w-4 h-4" /> Adicionar tipo
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {daysOfWeek.map((day, idx) => (
             <div key={day} className="mb-4 last:mb-0">
               <div className="font-medium text-gray-700 mb-2">{dayNames[idx]}</div>
