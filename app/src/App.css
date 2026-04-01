@@ -1,0 +1,4 @@
+/* Estilos globais do app – layout principal usa Tailwind */
+#root {
+  min-height: 100vh;
+}

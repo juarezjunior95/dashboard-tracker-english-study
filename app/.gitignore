@@ -11,12 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.*.local
-
-# Legacy app subfolder (versão antiga em app/)
-app/node_modules
-app/dist
 
 # Editor directories and files
 .vscode/*

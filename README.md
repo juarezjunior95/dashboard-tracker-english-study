@@ -1,16 +1,33 @@
-# React + Vite
+# B2 Study Tracker / Dashboard Tracker English Study
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dashboard para acompanhar estudos de inglês (nível B2).
 
-Currently, two official plugins are available:
+## App atual (raiz — React + Vite)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Metas diárias (speaking, vocabulário, revisão), minutos, notas, modo baixa energia, streak e progresso semanal, com **Supabase** (`daily_logs`).
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Build: `npm run build` → saída em `dist/`.
 
-## Expanding the ESLint configuration
+Configure `.env` a partir de `.env.example` e rode a migration em `supabase/migrations/`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Versões anteriores no mesmo repositório
+
+- **Raiz (legado):** abra `index.legacy.html` no navegador (com `style.css` e `script.js`). O `index.html` na raiz é o ponto de entrada do **Vite**.
+- **`app/`:** versão React + Vite + Tailwind anterior (calendário semanal, gráficos, entrevistas, `localStorage`).
+
+Para rodar a versão em `app/`:
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+## Links
+
+- Repositório: [dashboard-tracker-english-study](https://github.com/juarezjunior95/dashboard-tracker-english-study)

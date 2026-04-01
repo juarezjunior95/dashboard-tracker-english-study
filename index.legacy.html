@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2 Study Tracker (legado)</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="container">
+                <h1>📚 B2 Study Tracker</h1>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <div class="score-badge" id="totalPoints">
+                        <i data-lucide="trophy"></i>
+                        <span>0 pts</span>
+                    </div>
+                    <button id="editScheduleBtn" class="nav-btn" style="background: white; color: #4f46e5;">
+                        <i data-lucide="edit"></i> Editar Cronograma
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container week-navigation">
+            <button id="prevWeekBtn" class="nav-btn">← Semana Anterior</button>
+            <span id="weekRangeDisplay"></span>
+            <button id="nextWeekBtn" class="nav-btn">Próxima Semana →</button>
+        </div>
+
+        <main class="container main-grid">
+            <section class="card calendar-section">
+                <h2><i data-lucide="calendar"></i> Calendário Semanal</h2>
+                <div id="calendar" class="calendar"></div>
+            </section>
+
+            <section class="card checklists-section">
+                <h2><i data-lucide="check-square"></i> Checklist de Hoje</h2>
+                <div id="dailyChecklist" class="daily-checklist"></div>
+
+                <div class="weekly-summary">
+                    <h2><i data-lucide="bar-chart"></i> Resumo Semanal</h2>
+                    <div id="weeklyChecklist" class="weekly-checklist"></div>
+                </div>
+            </section>
+
+            <section class="card charts-section">
+                <h2><i data-lucide="trending-up"></i> Evolução</h2>
+                <div class="charts-container">
+                    <canvas id="pointsChart"></canvas>
+                    <canvas id="scoresChart"></canvas>
+                </div>
+                <div class="history-section">
+                    <h3><i data-lucide="archive"></i> Histórico de Semanas</h3>
+                    <div id="historyList" class="history-list"></div>
+                </div>
+            </section>
+        </main>
+
+        <div id="timerModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalActivityTitle">Atividade</h3>
+                    <button class="close-btn" onclick="closeModal()">✕</button>
+                </div>
+                <p id="modalTime" class="modal-time"></p>
+                <div id="timerDisplay" class="timer-display">20:00</div>
+                <div class="timer-controls" id="timerControls">
+                    <button class="btn-primary" id="startTimerBtn">▶ Iniciar</button>
+                    <button class="btn-secondary" id="pauseTimerBtn" disabled>⏸ Pausar</button>
+                    <button class="btn-secondary" id="resetTimerBtn">↺ Resetar</button>
+                </div>
+                <div id="inputSection" class="input-section hidden">
+                    <label id="inputLabel" for="activityInput"></label>
+                    <textarea id="activityInput" rows="3"></textarea>
+                    <button class="btn-success" id="completeActivityBtn">Concluir e Ganhar Pontos</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="editScheduleModal" class="modal hidden">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3>✏️ Editar Cronograma</h3>
+                    <button class="close-btn" onclick="closeEditModal()">✕</button>
+                </div>
+                <div id="editScheduleContainer" class="edit-schedule-container"></div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                    <button class="btn-success" id="saveScheduleBtn">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+</html>
