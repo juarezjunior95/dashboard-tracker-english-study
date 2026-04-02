@@ -6,10 +6,16 @@ import {
   fetchSessionsLast30Days,
   saveStudySession,
 } from '../../lib/studySessions'
+import {
+  addVocabularyWord,
+  fetchVocabularyWords,
+  markVocabularyReviewed,
+} from '../../lib/vocabularyWords'
 import { toLocalDateKey } from '../../utils/localDateKey'
 import { TodaySection } from './TodaySection'
 import { LowEnergyMode } from './LowEnergyMode'
 import { InsightsPanel } from './InsightsPanel'
+import { VocabularyPanel } from './VocabularyPanel'
 
 const ACTIVITY_KEYS = ['speaking', 'vocab', 'review']
 const DEFAULT_DAILY_GOAL = 30
@@ -84,6 +90,7 @@ export function Dashboard() {
   const todayKey = toLocalDateKey()
 
   const [sessions, setSessions] = useState([])
+  const [vocabularyWords, setVocabularyWords] = useState([])
   const [loadError, setLoadError] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -131,9 +138,16 @@ export function Dashboard() {
       return
     }
 
+    const { data: words, error: vocabError } = await fetchVocabularyWords(client)
+    if (vocabError) {
+      setLoadError(vocabError.message)
+      return
+    }
+
     setLoadError(null)
     const list = data ?? []
     setSessions(list)
+    setVocabularyWords(words ?? [])
     applyTodayFromSessions(list)
   }, [client, applyTodayFromSessions])
 
@@ -272,6 +286,22 @@ export function Dashboard() {
 
   const formattedToday = format(new Date(), 'EEEE, MMM d')
 
+  const handleAddVocabularyWord = async (word) => {
+    if (!client) return
+    const { error } = await addVocabularyWord(client, word, todayKey)
+    if (error) throw error
+    await reload()
+  }
+
+  const handleMarkVocabularyReviewed = async (wordId) => {
+    if (!client) return
+    const row = vocabularyWords.find((w) => w.id === wordId)
+    if (!row) return
+    const { error } = await markVocabularyReviewed(client, row, todayKey)
+    if (error) throw error
+    await reload()
+  }
+
   return (
     <div className="est-dashboard">
       <header className="est-dashboard__hero">
@@ -330,6 +360,13 @@ export function Dashboard() {
         disabled={!client}
         todayLabel={formattedToday}
         dateKey={todayKey}
+      />
+
+      <VocabularyPanel
+        words={vocabularyWords}
+        onAddWord={handleAddVocabularyWord}
+        onMarkReviewed={handleMarkVocabularyReviewed}
+        disabled={!client}
       />
 
       <LowEnergyMode />
