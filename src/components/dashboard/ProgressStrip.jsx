@@ -20,7 +20,7 @@ export function ProgressStrip({ streak, weeklyCompleted, weeklyTotal }) {
           <div className="est-progress__value">
             {weeklyCompleted}/{weeklyTotal}
           </div>
-          <div className="est-progress__label">full days this week</div>
+          <div className="est-progress__label">active days this week</div>
         </div>
       </div>
     </div>
