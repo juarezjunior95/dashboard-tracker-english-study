@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { format, startOfWeek, subDays } from 'date-fns'
 import { getSupabaseClient } from '../../lib/supabaseClient'
 import {
-  calculateStudyStreak,
   calculateTotalMinutesPerDay,
   fetchSessionsLast30Days,
   saveStudySession,
@@ -13,12 +12,71 @@ import { LowEnergyMode } from './LowEnergyMode'
 import { InsightsPanel } from './InsightsPanel'
 
 const ACTIVITY_KEYS = ['speaking', 'vocab', 'review']
-const DAILY_GOAL_MINUTES = 30
+const DEFAULT_DAILY_GOAL = 30
+const DEFAULT_MINIMUM_GOAL = 20
 
-function getStatusByMinutes(minutes) {
-  if (minutes >= DAILY_GOAL_MINUTES) return 'green'
-  if (minutes >= 15) return 'yellow'
+function clampGoal(value, fallback) {
+  const parsed = parseInt(value, 10)
+  if (Number.isNaN(parsed) || parsed < 1) return fallback
+  return parsed
+}
+
+function getStatusByMinutes(minutes, successGoal) {
+  if (minutes >= successGoal) return 'green'
+  if (minutes >= Math.max(15, Math.floor(successGoal * 0.5))) return 'yellow'
   return 'red'
+}
+
+function calculateGentleStreak(minutesByDay, anchorKey, successGoal) {
+  const [y, m, d] = anchorKey.split('-').map(Number)
+  let cursor = new Date(y, m - 1, d)
+  let misses = 0
+  let streak = 0
+
+  const todayMinutes = minutesByDay[anchorKey] ?? 0
+  if (todayMinutes < successGoal) {
+    misses = 1
+  } else {
+    streak += 1
+  }
+
+  for (let i = 0; i < 60; i++) {
+    cursor = subDays(cursor, 1)
+    const key = format(cursor, 'yyyy-MM-dd')
+    const mins = minutesByDay[key] ?? 0
+
+    if (mins >= successGoal) {
+      streak += 1
+      continue
+    }
+
+    misses += 1
+    if (misses >= 2) break
+  }
+
+  return streak
+}
+
+function getWeeklySuccessLabel(days) {
+  if (days >= 5) return 'Good consistency (5/7+ days)'
+  if (days >= 3) return 'Average consistency (3-4/7 days)'
+  return 'Needs improvement (<3/7 days)'
+}
+
+function getMotivationalMessage({ percentage, weeklyDays, streak }) {
+  if (percentage >= 100 && weeklyDays >= 5) {
+    return `Excellent work. You are on fire with a ${streak}-day streak.`
+  }
+  if (percentage >= 100) {
+    return 'Goal completed today. Keep this rhythm for the rest of the week.'
+  }
+  if (percentage >= 70) {
+    return 'Strong progress today. One short push and you will hit your goal.'
+  }
+  if (weeklyDays >= 3) {
+    return 'Your week is moving forward. Small sessions still build fluency.'
+  }
+  return 'Today can be a restart day. Even 10 focused minutes count.'
 }
 
 export function Dashboard() {
@@ -30,11 +88,17 @@ export function Dashboard() {
   const [saveError, setSaveError] = useState(null)
   const [saving, setSaving] = useState(false)
 
+  const [dailyGoal, setDailyGoal] = useState(DEFAULT_DAILY_GOAL)
+  const [minimumGoalMode, setMinimumGoalMode] = useState(true)
+  const [minimumGoal, setMinimumGoal] = useState(DEFAULT_MINIMUM_GOAL)
+
   const [speaking, setSpeaking] = useState(false)
   const [vocab, setVocab] = useState(false)
   const [review, setReview] = useState(false)
   const [minutes, setMinutes] = useState('0')
   const [notes, setNotes] = useState('')
+
+  const successGoal = minimumGoalMode ? minimumGoal : dailyGoal
 
   const applyTodayFromSessions = useCallback((list) => {
     const todaySessions = list.filter((s) => s.date === todayKey)
@@ -90,21 +154,30 @@ export function Dashboard() {
 
   const minutesByDay = useMemo(() => calculateTotalMinutesPerDay(sessions), [sessions])
   const todayMinutes = minutesByDay[todayKey] ?? 0
-
-  const streak = useMemo(
-    () => calculateStudyStreak(minutesByDay, todayKey),
-    [minutesByDay, todayKey],
+  const todayPercentage = useMemo(
+    () => Math.min(200, Math.round((todayMinutes / Math.max(1, dailyGoal)) * 100)),
+    [todayMinutes, dailyGoal],
   )
 
-  const weeklyMinutes = useMemo(() => {
+  const streak = useMemo(
+    () => calculateGentleStreak(minutesByDay, todayKey, successGoal),
+    [minutesByDay, todayKey, successGoal],
+  )
+
+  const { weeklyMinutes, weeklySuccessDays } = useMemo(() => {
     const start = startOfWeek(new Date(), { weekStartsOn: 1 })
     let total = 0
+    let successDays = 0
     for (let i = 0; i < 7; i++) {
       const key = format(subDays(start, -i), 'yyyy-MM-dd')
-      total += minutesByDay[key] ?? 0
+      const mins = minutesByDay[key] ?? 0
+      total += mins
+      if (mins >= successGoal) successDays += 1
     }
-    return total
-  }, [minutesByDay])
+    return { weeklyMinutes: total, weeklySuccessDays: successDays }
+  }, [minutesByDay, successGoal])
+
+  const weeklySuccessLabel = getWeeklySuccessLabel(weeklySuccessDays)
 
   const chartData = useMemo(() => {
     const out = []
@@ -115,11 +188,12 @@ export function Dashboard() {
       out.push({
         day: format(d, 'EEE'),
         minutes: total,
-        status: getStatusByMinutes(total),
+        percentage: Math.min(200, Math.round((total / Math.max(1, dailyGoal)) * 100)),
+        status: getStatusByMinutes(total, successGoal),
       })
     }
     return out
-  }, [minutesByDay])
+  }, [minutesByDay, dailyGoal, successGoal])
 
   const topActivities = useMemo(() => {
     const usage = {}
@@ -134,6 +208,11 @@ export function Dashboard() {
       .sort((a, b) => b.sessions - a.sessions || b.minutes - a.minutes)
       .slice(0, 5)
   }, [sessions])
+
+  const motivationalMessage = useMemo(
+    () => getMotivationalMessage({ percentage: todayPercentage, weeklyDays: weeklySuccessDays, streak }),
+    [todayPercentage, weeklySuccessDays, streak],
+  )
 
   const handleToggle = (key) => {
     if (key === 'speaking') setSpeaking((v) => !v)
@@ -197,7 +276,7 @@ export function Dashboard() {
     <div className="est-dashboard">
       <header className="est-dashboard__hero">
         <h1 className="est-dashboard__title">English Study Tracker</h1>
-        <p className="est-muted">Daily consistency over rigid schedules.</p>
+        <p className="est-muted">Flexible consistency for real-life routines.</p>
       </header>
 
       {!client && (
@@ -220,11 +299,19 @@ export function Dashboard() {
       )}
 
       <InsightsPanel
-        dailyGoal={DAILY_GOAL_MINUTES}
+        dailyGoal={dailyGoal}
+        minimumGoal={minimumGoal}
+        minimumGoalMode={minimumGoalMode}
+        onDailyGoalChange={(v) => setDailyGoal(clampGoal(v, dailyGoal))}
+        onMinimumGoalChange={(v) => setMinimumGoal(clampGoal(v, minimumGoal))}
+        onMinimumGoalModeChange={setMinimumGoalMode}
         todayMinutes={todayMinutes}
+        todayPercentage={todayPercentage}
         streak={streak}
         weeklyMinutes={weeklyMinutes}
-        status={getStatusByMinutes(todayMinutes)}
+        weeklySuccessLabel={`${weeklySuccessDays}/7 success days - ${weeklySuccessLabel}`}
+        motivationalMessage={motivationalMessage}
+        status={getStatusByMinutes(todayMinutes, successGoal)}
         chartData={chartData}
         topActivities={topActivities}
       />

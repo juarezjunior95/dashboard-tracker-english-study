@@ -444,3 +444,51 @@ body {
     grid-template-columns: 1fr;
   }
 }
+.est-goal-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.est-goal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--est-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.est-goal-field input {
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--est-text);
+  background: var(--est-bg);
+  border: 1px solid var(--est-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+}
+
+.est-goal-field input:disabled {
+  opacity: 0.5;
+}
+
+.est-goal-toggle {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--est-text);
+}
+
+.est-feedback {
+  margin: 0 0 0.9rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--est-border);
+  background: var(--est-bg);
+  font-size: 0.9rem;
+}
