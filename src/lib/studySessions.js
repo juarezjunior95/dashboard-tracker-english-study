@@ -92,6 +92,58 @@ export function calculateStudyStreak(minutesByDay, todayKey) {
 
 /**
  * @param {Record<string, number>} minutesByDay
+ * @param {string} todayKey - YYYY-MM-DD
+ * @param {number} threshold - Success threshold (default 20)
+ */
+export function calculateStreakStats(minutesByDay, todayKey, threshold = 20) {
+  const dates = Object.keys(minutesByDay).sort()
+  if (dates.length === 0) return { current: 0, best: 0 }
+
+  // 1. Calculate Best Streak (all time)
+  let best = 0
+  let currentAccumulated = 0
+  
+  // We need to iterate through a continuous range of dates to find gaps
+  const firstDate = new Date(dates[0])
+  const lastDate = new Date(todayKey)
+  const diffDays = Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24))
+
+  for (let i = 0; i <= diffDays; i++) {
+    const d = new Date(firstDate)
+    d.setDate(d.getDate() + i)
+    const key = format(d, 'yyyy-MM-dd')
+    const mins = minutesByDay[key] ?? 0
+    
+    if (mins >= threshold) {
+      currentAccumulated += 1
+      best = Math.max(best, currentAccumulated)
+    } else {
+      currentAccumulated = 0
+    }
+  }
+
+  // 2. Calculate Current Streak (working backwards from today)
+  let current = 0
+  let cursor = new Date(todayKey)
+  
+  // If today isn't done yet, check if yesterday was a streak day
+  if ((minutesByDay[todayKey] ?? 0) < threshold) {
+    cursor.setDate(cursor.getDate() - 1)
+  }
+
+  while (true) {
+    const key = format(cursor, 'yyyy-MM-dd')
+    const mins = minutesByDay[key] ?? 0
+    if (mins < threshold) break
+    current += 1
+    cursor.setDate(cursor.getDate() - 1)
+  }
+
+  return { current, best }
+}
+
+/**
+ * @param {Record<string, number>} minutesByDay
  * @param {Date} [anchorDate]
  */
 export function calculateWeeklyActiveDays(minutesByDay, anchorDate = new Date()) {
@@ -99,7 +151,7 @@ export function calculateWeeklyActiveDays(minutesByDay, anchorDate = new Date())
   let active = 0
   for (let i = 0; i < 7; i++) {
     const key = format(subDays(weekStart, -i), 'yyyy-MM-dd')
-    if ((minutesByDay[key] ?? 0) > 0) active += 1
+    if ((minutesByDay[key] ?? 0) >= 20) active += 1
   }
   return { completed: active, total: 7 }
 }

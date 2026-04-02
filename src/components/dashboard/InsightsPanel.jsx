@@ -1,4 +1,4 @@
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 const BAR_COLORS = {
   green: '#34d399',
@@ -17,6 +17,7 @@ const BAR_COLORS = {
  *  todayMinutes: number,
  *  todayPercentage: number,
  *  streak: number,
+ *  bestStreak: number,
  *  weeklyMinutes: number,
  *  weeklySuccessLabel: string,
  *  motivationalMessage: string,
@@ -26,15 +27,10 @@ const BAR_COLORS = {
  * }} props
  */
 export function InsightsPanel({
-  dailyGoal,
-  minimumGoal,
-  minimumGoalMode,
-  onDailyGoalChange,
-  onMinimumGoalChange,
-  onMinimumGoalModeChange,
   todayMinutes,
   todayPercentage,
   streak,
+  bestStreak,
   weeklyMinutes,
   weeklySuccessLabel,
   motivationalMessage,
@@ -53,29 +49,14 @@ export function InsightsPanel({
 
   return (
     <section className="est-card est-insights">
-      <div className="est-goal-config">
-        <label className="est-goal-field">
-          <span>Daily goal</span>
-          <input type="number" min={1} value={dailyGoal} onChange={(e) => onDailyGoalChange(e.target.value)} />
-        </label>
-        <label className="est-goal-toggle">
-          <input
-            type="checkbox"
-            checked={minimumGoalMode}
-            onChange={(e) => onMinimumGoalModeChange(e.target.checked)}
+      <div className="est-goal-info">
+        <p className="est-muted">Success Target: 20 min • Daily Goal: 30 min</p>
+        <div className="est-progress-bar-wrap">
+          <div
+            className={`est-progress-bar est-progress-bar--${status}`}
+            style={{ width: `${Math.min(100, todayPercentage)}%` }}
           />
-          <span>Minimum goal mode</span>
-        </label>
-        <label className="est-goal-field">
-          <span>Minimum goal</span>
-          <input
-            type="number"
-            min={1}
-            value={minimumGoal}
-            onChange={(e) => onMinimumGoalChange(e.target.value)}
-            disabled={!minimumGoalMode}
-          />
-        </label>
+        </div>
       </div>
 
       <div className="est-insights__grid">
@@ -87,9 +68,9 @@ export function InsightsPanel({
         </article>
 
         <article className="est-metric">
-          <p className="est-metric__label">Current streak</p>
-          <p className="est-metric__value">{streak} days</p>
-          <p className="est-muted">Gentle streak (1 skip tolerated)</p>
+          <p className="est-metric__label">Streak (Current / Best)</p>
+          <p className="est-metric__value">{streak} / {bestStreak} <span className="est-days-text">days</span></p>
+          <p className="est-muted">Valid day = 20 min</p>
         </article>
 
         <article className="est-metric">
@@ -119,9 +100,10 @@ export function InsightsPanel({
                   color: 'var(--est-text)',
                 }}
               />
+              <ReferenceLine y={20} stroke="var(--est-danger)" strokeDasharray="3 3" label={{ position: 'right', value: '20m', fill: 'var(--est-danger)', fontSize: 10 }} />
               <Bar dataKey="minutes" radius={[6, 6, 0, 0]}>
                 {chartData.map((entry) => (
-                  <Cell key={entry.day} fill={BAR_COLORS[entry.status]} />
+                  <Cell key={entry.day} fill={entry.minutes >= 20 ? 'var(--est-accent)' : 'var(--est-border)'} />
                 ))}
               </Bar>
             </BarChart>
